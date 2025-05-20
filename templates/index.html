@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Task Manager</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet">
+</head>
+<body>
+    <div class="container py-4">
+        <h1 class="mb-4">Task Manager</h1>
+
+        <!-- Create Task Form -->
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="card-title mb-0">Add New Task</h5>
+            </div>
+            <div class="card-body">
+                <form action="/tasks" method="POST">
+                    <div class="mb-3">
+                        <label for="title" class="form-label">Title:</label>
+                        <input type="text" class="form-control" id="title" name="title" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Description:</label>
+                        <textarea class="form-control" id="description" name="description" rows="3"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-success">
+                        <i class="bi bi-plus-circle me-1"></i> Add Task
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Task List -->
+        <h2 class="mb-3">Tasks</h2>
+        <div id="task-list">
+            {% for task in tasks %}
+            <div class="card mb-3 {% if task.completed %}border-success{% endif %}" id="task-{{ task._id }}">
+                <div class="card-header {% if task.completed %}bg-light{% else %}bg-white{% endif %} d-flex justify-content-between align-items-center">
+                    <h5 class="card-title mb-0">{{ task.title }}</h5>
+                    <div>
+                        {% if task.completed %}
+                        <span class="badge bg-success me-2">Completed</span>
+                        {% endif %}
+                        <button class="btn btn-sm btn-primary" onclick="toggleEditForm('{{ task._id }}')">
+                            <i class="bi bi-pencil me-1"></i> Edit
+                        </button>
+                        <form action="/tasks/{{ task._id }}/delete" method="POST" class="d-inline">
+                            <button type="submit" class="btn btn-sm btn-danger">
+                                <i class="bi bi-trash me-1"></i> Delete
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">{{ task.description }}</p>
+
+                    <!-- Edit Form (Hidden by default) -->
+                    <form action="/tasks/{{ task._id }}" method="POST" class="d-none" id="edit-form-{{ task._id }}">
+                        <div class="mb-3">
+                            <label for="edit-title-{{ task._id }}" class="form-label">Title:</label>
+                            <input type="text" class="form-control" id="edit-title-{{ task._id }}" name="title" value="{{ task.title }}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="edit-description-{{ task._id }}" class="form-label">Description:</label>
+                            <textarea class="form-control" id="edit-description-{{ task._id }}" name="description" rows="3">{{ task.description }}</textarea>
+                        </div>
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" id="completed-{{ task._id }}" name="completed" {% if task.completed %}checked{% endif %}>
+                            <label class="form-check-label" for="completed-{{ task._id }}">
+                                Completed
+                            </label>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-success">
+                                <i class="bi bi-check-circle me-1"></i> Update Task
+                            </button>
+                            <button type="button" class="btn btn-secondary" onclick="toggleEditForm('{{ task._id }}')">
+                                <i class="bi bi-x-circle me-1"></i> Cancel
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <script>
+        function toggleEditForm(taskId) {
+            const editForm = document.getElementById(`edit-form-${taskId}`);
+
+            if (editForm.classList.contains('d-none')) {
+                editForm.classList.remove('d-none');
+            } else {
+                editForm.classList.add('d-none');
+            }
+        }
+    </script>
+</body>
+</html>
